@@ -1,0 +1,606 @@
+
+<!DOCTYPE html>
+<html lang=en-US dir=ltr>
+	<head>
+		<meta charset=utf-8>
+		<title>Cliques!</title>
+		<meta name=description content=''>
+		<meta name=author content='Xing Liu'>
+		<meta name=viewport content='width=device-width, initial-scale=1.0'>
+		<link rel=icon type=image/png href=/icon.png>
+		<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital@0;1&display=swap" rel="stylesheet">
+		<style>
+html{
+     font-size: 16px;
+     font-family: 'Bodoni Moda', serif;
+}
+ html, body {
+     margin: 0;
+     width: 100%;
+     height: 100%;
+}
+.p0, body {
+     --fill: #ffe; --theme: #bed; --stroke: #fff;
+     --red: #f08; --green: #4a8; --blue: #84f;
+}
+.p1 {
+     --fill: #024; --theme: #469; --stroke: #000;
+     --red: #f90; --green: #0fa; --blue: #01f;
+}
+.p2 {
+     --theme: #cbf; --fill: #fff; --stroke: #000;
+     --red: #f44; --green: #4e4; --blue: #44e;
+}
+.p3 {
+     --fill: #106; --theme: #ffe; --stroke: #fff;
+     --red: #fbf; --green: #fda; --blue: #70f;
+}
+ body {
+    display: flex;
+    background: var(--theme);
+}
+aside,
+main {
+    overflow: scroll;
+    padding: 1rem;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    margin: 0;
+}
+* {
+    box-sizing: border-box;
+    transition-duration: 200ms;
+    transition-property: background, fill, box-shadow;
+}
+[hidden] {
+    display: none;
+    visibility: hidden;
+    position: fixed;
+}
+/* SIDE PANEL */
+@media screen and (max-width:50rem) {
+    body {
+        flex-direction: column-reverse;
+        height: auto;
+    }
+    aside {
+        max-width: 100%;
+    }
+}
+@media screen and (min-width:50rem) {
+    aside,
+    main {
+        height: 100%;
+    }
+    aside {
+        height: auto;
+        width: 24rem;
+    }
+}
+aside label {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+}
+#log {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    border: none;
+}
+h1 {
+    text-align: center;
+    font-size: 3rem;
+    font-style: italic;
+    filter: drop-shadow(0 .2rem white);
+}
+h2 {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 0.1em solid white;
+}
+main {
+    display: grid;
+    flex-grow: 1;
+    font-size: calc(2px + 2vmin);
+    grid-template-columns: repeat(auto-fit, 7em);
+    grid-auto-rows: 8em;
+    grid-gap: 1em;
+    justify-content: center;
+}
+.card {
+    border-radius: 1em;
+    padding: 1em;
+    width: 100%;
+    height: 100%;
+    background: var(--fill);
+    box-shadow: 0.1em 0.1em 0 0 var(--stroke);
+    cursor: pointer;
+    --color: black;
+}
+.card > input {
+    position: absolute;
+    opacity: 0;
+    cursor: inherit;
+}
+.card:focus-within,
+.card:hover {
+    box-shadow: 0.2em 0.2em 0 0 var(--color);
+}
+.card#deck {
+    z-index: 100000;
+    order: 100000;
+    grid-column-start: -2;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    user-select: none;
+    box-shadow: 0.1em 0.1em var(--theme), 0.2em 0.2em var(--stroke), 0.3em 0.3em var(--theme), 0.4em 0.4em var(--stroke), 0.5em 0.5em var(--theme), 0.6em 0.6em var(--stroke);
+}
+.card#deck:focus-within,
+.card#deck:hover {
+    box-shadow: 0.1em 0.1em var(--red), 0.2em 0.2em var(--red), 0.3em 0.3em var(--green), 0.4em 0.4em var(--green), 0.5em 0.5em var(--blue), 0.6em 0.6em var(--blue);
+}
+.card#deck > :nth-child(1) {
+    color: var(--red);
+}
+.card#deck > :nth-child(2) {
+    color: var(--green);
+    font-size: 3em;
+}
+.card#deck > :nth-child(3) {
+    color: var(--blue);
+}
+.card.checked,
+.card:active {
+    box-shadow: 0 0 0 0.2em var(--color);
+}
+.card.fade {
+    animation: 500ms fade;
+}
+@keyframes fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+.card > svg {
+    fill: var(--color);
+    stroke: var(--color);
+    stroke-width: 5;
+}
+/* number */
+ .f0_0>svg>:first-child, .f0_0>svg>:last-child,
+ .f0_1>svg>:last-child { opacity: 0  }
+ .f0_1>svg>:first-child { transform: translate(0, -25px) }
+ .f0_1>svg>:nth-child(2) { transform: translate(0, 25px) }
+ 
+/* shades */
+ .f1_0>svg { fill-opacity: 0  }
+ .f1_1>svg { fill-opacity: 0.4  }
+ .f1_2>svg { fill-opacity: 1  }
+ 
+/* colors */
+ .f2_0 { --color: var(--red)  }
+ .f2_1 { --color: var(--blue)  }
+ .f2_2 { --color: var(--green)  }
+
+/* shapes */
+ .f3_0 { }
+ .f3_1 { }
+ .f3_2 { }
+
+/* rotations */
+ .f4_0>svg { transform: rotate(0deg)  }
+ .f4_1>svg { transform: rotate(45deg)  }
+ .f4_2>svg { transform: rotate(-45deg)  }
+
+/* something */
+ .f5_0>svg { }
+ .f5_1>svg>* { stroke-dasharray: 1em 2em }
+ .f5_2>svg>* { stroke-dasharray: 2em 1em }
+ 
+		</style>
+	</head>
+	<body class='p0 l0'>
+		<aside>
+			<h1>Cliques!</h1>
+			<section>
+				<h2>Players</h2>
+				<ol id=players>
+					<li>You</li>
+				</ol>
+<!-- 				<label>
+				<span>Invite others online:</span>
+				  <input type=text readonly value=https://x-ing.space/cliques#pqrstuvwxyz disabled>
+				</label> -->
+			</section>
+			<form id=settings>
+				<h2>Settings</h2>
+				<label id=decks>
+          <span>Decks (0 is infinite)</span>
+          <input type=number min=0 value=0>
+          <input type=range min=0 max=10 value=0>
+				</label>
+<!-- 				<label id=time>
+          <span>Time limit (seconds) (0 is infinite)</span>
+          <input type=number min=0 value=10>
+          <input type=range min=0 max=300 value=10>
+				</label> -->
+				<label id=features>
+          <span>Difficulty (number of features per card)</span>
+          <input type=number min=2 max=6 value=4>
+          <input type=range min=2 max=6 value=4>
+				</label>
+<!-- 				<label id=threshold>
+          <span>Threshold for extra cards (% voted in favor)</span>
+          <input type=number min=0 max=100 value=100 disabled>
+          <input type=range min=0 max=100 value=100 disabled>
+				</label> -->
+				<input type=submit value='New game'>
+			</form>
+			<form id=preferences>
+				<h2>Preferences</h2>
+				<label id=palette>
+          <span>Color palette</span>
+          <input type=number min=0 max=3 value=0>
+          <input type=range min=0 max=3 value=0>
+				</label>
+<!-- 				<label id=look>
+          <span>Look</span>
+          <input type=number min=0 max=3 value=0 disabled>
+          <input type=range min=0 max=3 value=0 disabled>
+				</label> -->
+			</form>
+			<section>
+				<h2>How to play</h2>
+				<p>Cliques is Xing’s open-source adaptation of the mathematical card game Set by Marsha Falco.</p>
+				<p>In this game, each card has four features: number, shading, color, and shape. Each characteristic has 3 possible variations.</p>
+				<p>To play, select a trio of cards. You score a point if that trio of cards is a <em>clique</em>, and lose a point otherwise.</p>
+				<p>A trio is considered a <em>clique</em> if for every feature, either all three cards have the same variation, or all three cards have different variations.</p>
+			</section>
+			<section>
+				<h2>History</h2>
+				<label>
+				<span>Log</span>
+				<textarea id=log readonly rows=20></textarea>
+				</label>
+			</section>
+		</aside>
+		<main id=game>
+			<label class=card id=deck>
+			<span>Add</span>
+			<span>3</span>
+			<span>cards</span>
+			<input type=button hidden>
+			</label>
+		</main>
+		<aside hidden>
+			<template id=template-card>
+				<label class=card>
+					<input type=checkbox>
+					<svg viewBox='0 0 140 160'>
+						<use class='shape' href='#c3_0' transform='translate(0 -50)'/>
+						<use class='shape' href='#c3_0' transform='translate(0 0)'/>
+						<use class='shape' href='#c3_0' transform='translate(0 50)'/>
+					</svg>
+				</label>
+			</template>
+			<template id=template-player>
+				<li class=player></li>
+			</template>
+			<svg>
+				<symbol id='c3_0'>
+					<!-- pill -->
+					<rect x='5' y='62' width='130' height='34' rx='20'/>
+				</symbol>
+				<symbol id='c3_1'>
+					<!-- squiggle -->
+					<path d='M5 75 c 0 0 25 -20 40 -20 c 15 0 35 15 50 15  c 15 0 40 -10 40 -10 v 15 c 0 0 -25 20 -40 20 c -15 0 -35 -15 -50 -15 c -15 0 -40 10 -40 10 z'/>
+				</symbol>
+				<symbol id='c3_2'>
+					<!-- diamond -->
+					<path d='M10 80 l 60 -20 l 60 20 l -60 20 z'/>
+				</symbol>
+			</svg>
+		</aside>
+		<script>
+// shortcuts for selecting elements
+const $ = (query = '*', target = document) => target.querySelector(query)
+const $$ = (query = '*', target = document) => Array.from(target.querySelectorAll(query))
+
+// create array of 0's
+const A = (size) => Array(size).fill(0)
+
+// count frequency of values in array
+const N = (array, value) => array.filter(v => v===value).length
+
+// get template
+const T = (id) => document.getElementById('template-' + id)
+.content.cloneNode(true)
+.firstElementChild
+
+// split underscores into features
+const _ = (card) => card.split('_')
+
+// make readable
+const R = (card) => _(card).map(
+  (variation,feature) => [ '123', 'abc', 'RGB', '—~＋', 'xyz', '/&^' ][feature][variation]
+).join(' ')
+
+// center if possible
+const recenter = (element) => element.style.alignContent = element.scrollHeight > window.innerHeight ? 'start' : 'center'
+
+
+// state
+const s = {
+  // constants / enums
+  c: {
+    clique: 3, // # of cards per clique, and # of variations per feature
+    COUNT: 0,
+    SHADE: 1,
+    COLOR: 2,
+    SHAPE: 3,
+    ANGLE: 4,
+    MSTRY: 5,
+  },
+  // DOM elements
+  e: {
+    game: $('#game'),
+    deck: $('#deck'),
+    players: $('#players'),
+    settings: $('#settings'),
+    preferences: $('#preferences'),
+    log: $('#log'),
+  },
+  // live-updating settings
+  ls: {
+    decks: 0, // decks of cards (0=inf)
+    time: 0, // time allowed after clique buzz
+    features: 4, // # of features per card
+    threshold: 100, /// % majority for extra cards
+    palette: 0,
+    look: 0,
+  },
+  // fixed-per-game settings
+  s: {},
+  // players
+  p: {
+    [Math.random()]: {
+      score: 0,
+      name: 'You',
+      local: true,
+    }
+  },
+  // game
+  g: {
+    selected: [], // selected cards
+    sums: [], // sum of card feature & variations
+    turn: 0, // id of current turn player
+    deck: [], // all unused cards
+    visible: [], // all visible cards
+    history: [], // history of cliques & miscliques
+    tally: {
+      cards: 0,
+    }
+  }
+}
+
+$$('aside label').forEach(label=>{
+  label.addEventListener('input',event=>{
+    s.ls[event.target.parentElement.id] = parseInt(event.target.value)
+    $$('input', label).forEach(input=>{
+      input.value = event.target.value
+    })
+  })
+})
+
+
+window.addEventListener('resize', _ => recenter(s.e.game))
+recenter(s.e.game)
+
+s.e.deck.addEventListener('click',event=>{
+  A(s.c.clique).forEach( _ => s.g.visible.push(s.g.deck.pop()) )
+  event.preventDefault()
+  recenter(s.e.game)
+  renderGame()
+})
+
+s.e.preferences.addEventListener('input',event=>{
+  document.body.classList = 'p'+s.ls.palette
+})
+
+function newGame(){
+
+  // freeze settings for game
+  s.s = { ... s.ls }
+  console.log(s.s)
+
+  // generate cards
+  s.g.deck = (
+
+    // allocate space for all cards in deck
+    A( s.c.clique ** s.s.features )
+
+    // add in cards
+    .map( (_,i) =>
+
+      // allocate space for each feature
+      A(s.s.features)
+
+      // unwrap index into features
+      // similar to breaking down a number into component digits 
+      .map( (_,k) => Math.floor( i / s.c.clique**k ) % s.c.clique )
+
+      // strings are easier to handle with HTML
+      .join('_')
+    )
+
+    // shuffle
+    .map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
+  )
+
+  // put some on the table
+  s.g.visible = A(s.c.clique * s.s.features).map( _ => s.g.deck.pop() )
+
+  softResetGame()
+
+  s.g.history = []
+  s.g.tally = s.g.visible.length + s.g.clique
+  s.g.scores = A(s.p.length)
+  s.g.turn = Object.keys(s.p)[0]
+
+  s.e.game.style.fontSize = `calc((2px + 1vmin + 1vmax)*${Math.min(1,3.5/Math.log(s.g.deck.length))})`
+
+  renderGame()
+}
+
+s.e.game.addEventListener('change',event => {
+  const element = event.target.parentElement
+  const card = element.id
+
+  // adding or removing a card?
+  const checked = event.target.checked
+  element.classList.toggle('checked', checked)
+
+  checked ? s.g.selected.push(card) : s.g.selected.splice(s.g.selected.indexOf(card))
+
+  // update sum
+  _(event.target.parentElement.id)
+  .forEach((feature,index)=>s.g.sums[index][feature] += checked ? 1 : -1)
+
+  // if clique reached
+  if(s.g.selected.length === s.c.clique) {
+        
+    const valid = (
+      s.g.sums.every(
+      feature =>
+      ( N(feature,1) === s.c.clique ) ||
+      ( N(feature,s.c.clique) === 1 )
+    ))
+
+    // take turns changing scores
+    s.p[s.g.turn].score += valid ? 1 : -1
+
+    if(valid){
+      
+      s.g.selected.forEach( card => {
+        
+        // add card back to deck if > 1 deck
+        if (
+          s.s.decks === 0 ||
+          s.g.tally < s.s.decks * (s.c.clique ** s.s.features) 
+        )
+          s.g.deck.unshift(card)
+        
+        // remove card from visible; replace if deck still exist
+        s.g.visible.splice(
+          s.g.visible.indexOf(card), 1, ...(
+            ( s.g.visible.length <= s.c.clique * s.s.features ) &&
+            ( s.g.deck.length > 0 ) ?
+            [ s.g.deck.pop() ] :
+            []
+        ) )
+        
+        s.g.tally++
+        
+      })
+    }
+
+    s.g.history.unshift(
+      `${ new Date().toLocaleTimeString() }: ${ s.p[s.g.turn].name } ${ valid ? '' : 'mis' }cliqued { ${ s.g.selected.map(R).join(', ') } }.`
+    )
+
+    softResetGame()
+    renderGame()
+  }
+
+})
+
+function renderGame(){
+  s.e.deck.toggleAttribute(
+    'hidden',
+    (s.g.deck.length < s.c.clique) ||
+    (s.g.visible.length >= s.c.clique * s.s.features + s.c.clique) 
+  )
+  
+  s.e.game.removeChild(s.e.deck)
+
+  while(s.e.game.childElementCount > s.g.visible.length)
+    s.e.game.removeChild(s.e.game.lastElementChild)
+
+  while(s.e.game.childElementCount < s.g.visible.length)
+    s.e.game.appendChild(T('card'))
+
+  s.g.visible.forEach((card, index) => {
+    const element = s.e.game.children[index]
+    
+    element.classList.remove('fade')
+    
+    const checked = s.g.selected.includes(card)
+    element.firstElementChild.checked = checked
+    element.classList.toggle('checked', checked)
+
+    if(element.id === card) return
+
+    // create classes for CSS, f{feature id}_{variation id}
+    element.classList = _(card).map(
+      (variation,feature) => 'f'+feature+'_'+variation
+    ).concat(['card']).join(' ')
+
+    element.id = card
+    element.title = R(card)
+
+    element.classList.add('fade')
+
+    $$('.shape',element).forEach( shape =>
+      shape.setAttribute( 'href', `#c${s.c.SHAPE}_${_(card)[s.c.SHAPE] || 0}` )
+    )
+  })
+
+  s.e.game.appendChild(s.e.deck)
+
+  s.e.players.replaceChildren(...
+    Object.values(s.p)
+    .map((player, index) => {
+      const element = T('player')
+      element.textContent = `${player.name} (${player.score})`
+      return element
+    })
+  )
+  s.e.log.value = s.g.history.join('\n')
+}
+
+function softResetGame(){
+
+  // keep track of selected features & variations
+  s.g.sums = (
+
+    // allocate space for each feature
+    A(s.s.features)
+
+    // allocate space for each variation
+    .map( _ => A(s.c.clique) )
+
+  )
+  s.g.selected = []
+  document.activeElement.blur()
+
+}
+
+// new game
+s.e.settings.addEventListener('submit',event=>{
+  event.preventDefault()
+  newGame()
+})
+
+newGame()
+					
+		</script>
+	</body>
+</html>
